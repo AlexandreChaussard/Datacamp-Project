@@ -1,0 +1,9 @@
+name: ramp-iris
+channels:
+  - defaults
+dependencies:
+  - numpy
+  - pandas
+  - ramp-workflow
+  - scikit-learn
+  - seaborn
