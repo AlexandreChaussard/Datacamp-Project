@@ -40,7 +40,7 @@ def get_cgm_data(user_id, path='.'):
     # Fetching the CGM data
     cgm_data = pd.read_csv(os.path.join(path, 'data', f'case  {user_id}.csv'), index_col=[0])
     # Interpolate the missing data (this is verified by smoothing techniques of Abbott & Dexcom CGMs)
-    cgm_data = cgm_data.interpolate()
+    #cgm_data = cgm_data.interpolate()
     return cgm_data.rename(columns={'hora': 'timestamp', 'glucemia': 'glycemia'})
 
 
@@ -120,7 +120,7 @@ def _read_clinical_data_and_labels(path='.'):
     X = clinical_data.drop(columns=["T2DM"])
 
     # Filling the one missing value of the BIM with the mean
-    X["BMI"].fillna(value=X["BMI"].mean(), inplace=True)
+    #X["BMI"].fillna(value=X["BMI"].mean(), inplace=True)
 
     return X, y
 
