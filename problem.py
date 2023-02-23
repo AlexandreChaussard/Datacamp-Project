@@ -10,7 +10,7 @@ Predictions = rw.prediction_types.make_multiclass(
     label_names=[0, 1]
 )
 # An object implementing the workflow
-workflow = rw.workflows.Estimator()
+workflow = rw.workflows.EstimatorExternalData()
 
 score_types = [
     rw.score_types.BalancedAccuracy(name='balanced_accuracy'),
@@ -31,53 +31,6 @@ def get_cv(X, y):
 # -----------------------------------------------------------------------------
 # Training / testing data reader
 # -----------------------------------------------------------------------------
-
-def get_cgm_data(user_id, path='.'):
-    """
-    Fetch the CGM data of a given individual in the dataset
-    """
-
-    # Fetching the CGM data
-    cgm_data = pd.read_csv(os.path.join(path, 'data', f'case  {user_id}.csv'), index_col=[0])
-    # Interpolate the missing data (this is verified by smoothing techniques of Abbott & Dexcom CGMs)
-    cgm_data = cgm_data.interpolate()
-    return cgm_data.rename(columns={'hora': 'timestamp', 'glucemia': 'glycemia'})
-
-
-def get_24h_cgm_data(user_id_list, path='.'):
-    """
-    Fetch all the CGM data cut into 24h samples for statistical studies of the given list of users.
-    """
-    def sample_index_to_time(sample_index):
-        # We introduce an intermediate function to turn the 5 minute sampled indexes of the CGM into HH:MM format
-        # We know that every one is starting the study around midnight + or - 4 minutes
-        minute_value = sample_index * 5
-
-        hour_value = str(minute_value // 60)
-        if len(hour_value) == 1:
-            hour_value = "0" + hour_value
-
-        minute_value = str(minute_value % 60)
-        if len(minute_value) == 1:
-            minute_value = "0" + minute_value
-
-        return hour_value + ":" + minute_value
-
-    # Building the dataframe
-    df = pd.DataFrame(columns=[sample_index_to_time(i) for i in range(0, 288)])
-    for user_id in user_id_list:
-        cgm_data = get_cgm_data(user_id, path)["glycemia"]
-        # We have 2 possible situations, since the data are sampled at 5 minutes rate:
-        #  * Either the patient has come through a 48h monitoring, in which case the time serie is 576 long
-        #  * Either the patient has come through a 24h monitoring, which case the time serie is 288 long
-        if cgm_data.shape[0] == 576:
-            df.loc[str(user_id) + "_1"] = cgm_data[:288].values
-            df.loc[str(user_id) + "_2"] = cgm_data[288:].values
-        else:
-            df.loc[str(user_id) + "_1"] = cgm_data.values
-
-    return df
-
 
 def _read_raw_clinical_data(path='.'):
     """
