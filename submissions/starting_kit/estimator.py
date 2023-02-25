@@ -62,6 +62,7 @@ class FeatureExtractor:
         X = self.add_cgm_feature(X, "cgm_mean", self.compute_mean)
         X = self.add_cgm_feature(X, "cgm_time_in_range", self.compute_average_time_in_range)
         X = self.add_cgm_feature(X, "cgm_max", self.compute_maximum)
+        X = X.drop(["HbA1c", "BMI"], axis=1)
 
         return X
 
