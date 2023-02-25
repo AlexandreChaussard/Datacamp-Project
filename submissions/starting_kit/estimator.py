@@ -3,7 +3,6 @@ from sklearn.pipeline import Pipeline, make_pipeline
 import sklearn.preprocessing as preprocessing
 import numpy as np
 
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 
 

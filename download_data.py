@@ -10,6 +10,7 @@ import numpy as np
 import os
 
 from sklearn.model_selection import train_test_split
+from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 
 
@@ -91,8 +92,12 @@ def read_clinical_data_and_labels(path='.'):
     X = clinical_data.drop(columns=["T2DM"])
 
     # Filling the one missing value of the BIM using the iterative imputer (cf notebook for origin of that procedure)
+    # Be careful, data imputers actually break the indexes, so one must replace them correctly afterwards
+    indexes = X.index.values
     imp = IterativeImputer(max_iter=10, random_state=0)
     X = pd.DataFrame(imp.fit_transform(X), columns=X.columns)
+    # And we replace the indexes correctly
+    X.index = indexes
 
     return X, y
 
