@@ -1,7 +1,10 @@
 import os
 import pandas as pd
 import rampwf as rw
+from rampwf.score_types.base import BaseScoreType
+from rampwf.score_types.classifier_base import ClassifierBaseScoreType
 from sklearn.model_selection import RepeatedStratifiedKFold
+from sklearn.metrics import recall_score, precision_score
 
 problem_title = 'Types 2 Diabetes prediction'
 # A type (class) which will be used to create wrapper objects for y_pred
@@ -11,13 +14,46 @@ Predictions = rw.prediction_types.make_multiclass(
 # An object implementing the workflow
 workflow = rw.workflows.EstimatorExternalData()
 
+
+# -----------------------------------------------------------------------------
+# Scores
+# -----------------------------------------------------------------------------
+
+class Recall(ClassifierBaseScoreType):
+    def __init__(self,
+                 name : str ='Recall_0',
+                 precision : int =2,
+                 pos_label : int = 0):
+        self.name = name
+        self.precision = precision
+        self.pos_label = pos_label
+    def __call__(self, y_true_label_index, y_pred_label_index):
+        score = recall_score(y_true_label_index, y_pred_label_index, pos_label=self.pos_label)
+        return score
+
+
+class Precision(ClassifierBaseScoreType):
+    def __init__(self,
+                 name : str ='Precision_0',
+                 precision : int =2,
+                 pos_label : int = 0):
+        self.name = name
+        self.precision = precision
+        self.pos_label = pos_label
+
+    def __call__(self, y_true_label_index, y_pred_label_index):
+        score = precision_score(y_true_label_index, y_pred_label_index, pos_label=self.pos_label)
+        return score
+
 score_types = [
-    rw.score_types.BalancedAccuracy(name='balanced_accuracy'),
+    Recall(name='recall_1', pos_label=1),
+    Recall(name='recall_0', pos_label=0),
+    Precision(name='precision_1', pos_label=1),
+    Precision(name='precision_0', pos_label=0),
+
     rw.score_types.ROCAUC(name="auc"),
     rw.score_types.ClassificationError(name='error')
 ]
-
-
 # -----------------------------------------------------------------------------
 # Cross-validation scheme
 # -----------------------------------------------------------------------------

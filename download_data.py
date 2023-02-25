@@ -10,7 +10,9 @@ import numpy as np
 import os
 
 from sklearn.model_selection import train_test_split
+from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+
 
 
 def get_cgm_data(user_id, path='.'):
