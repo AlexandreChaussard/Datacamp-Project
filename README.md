@@ -12,4 +12,4 @@ python download_data.py
 
 # Dataset
 
-Link: https://archive-beta.ics.uci.edu/dataset/34/diabetes
+Link: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0225817#sec018
