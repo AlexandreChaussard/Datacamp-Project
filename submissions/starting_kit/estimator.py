@@ -3,8 +3,7 @@ from sklearn.pipeline import Pipeline, make_pipeline
 import sklearn.preprocessing as preprocessing
 import numpy as np
 
-from sklearn.linear_model import LogisticRegression
-
+from sklearn.ensemble import HistGradientBoostingClassifier
 
 def get_cgm_data():
     data = pd.read_csv('external_data.csv')
@@ -71,9 +70,11 @@ def get_preprocessing():
 
 def get_estimator() -> Pipeline:
     feature_extractor = FeatureExtractor()
-
-    classifier = LogisticRegression(
-        random_state=0
+    classifier = HistGradientBoostingClassifier(
+        max_depth=3,
+        random_state=42,
+        validation_fraction=0.3,
+        class_weight={1:0.9, 0:0.3}
     )
 
     pipe = make_pipeline(
