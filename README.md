@@ -1,8 +1,4 @@
-# Dataset
-
-Link: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0225817#sec018
-
-# Predicting the Type 2 Diabetes Mellitus with non-invasive measurements
+# Predicting Type 2 Diabetes Mellitus with non-invasive measurements
 
 Authors : AMANI Alexandra, BISCARRAT Lilian, CHAUSSARD Alexandre, CLERGUE Eva, NORMAND Sophie, SALEMBIEN Tom
 
@@ -19,7 +15,7 @@ While this technique has proved to be really efficient in the diagnosis, it has 
 - First, HbA1c is a post-disease settlement indicator, as it requires the patient to have abnormally high sugar levels over 3 months to be indicating the disease. One would rather like to be able to diagnose diabetes before it reaches that critical point.
 - Second, HbA1c being a blood measurement, which is naturally invasive for the patient and some may even be really reluctant and refuse to go for a diagnosis. Also, it requires careful analysis in a medical lab, which obviously costs money.
 
-As a result, the goal of our study is to provide a machine learning algorithm that is able to predict whether or not somebody may become diabetic in the coming time, based on blood glucose measurements from a non-invasive Continuous Glucose Monitor (CGM), as well as gathered clinical data for the patient over the duration of the study.
+As a result, the goal of our study is to provide a machine learning algorithm that is able to predict whether or not somebody may become diabetic in the coming time, based on blood glucose measurements from a non-invasive Continuous Glucose Monitor (CGM), as well as gathered clinical data for the patient over the duration of the [reference study](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0225817#sec018).
 
 ## Getting started
 
