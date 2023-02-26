@@ -61,7 +61,6 @@ class FeatureExtractor:
         X = self.add_cgm_feature(X, "cgm_mean", self.compute_mean)
         X = self.add_cgm_feature(X, "cgm_time_in_range", self.compute_average_time_in_range)
         X = self.add_cgm_feature(X, "cgm_max", self.compute_maximum)
-
         return X
 
 
@@ -75,7 +74,7 @@ def get_estimator() -> Pipeline:
         max_depth=3,
         random_state=42,
         validation_fraction=0.3,
-        class_weight={1: 0.9, 0: 0.3}
+        class_weight={1: 20, 0: 1}
     )
 
     pipe = make_pipeline(
