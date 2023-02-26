@@ -36,6 +36,9 @@ class FeatureExtractor:
 
         clinical_data[feature_name] = feature_column
         return clinical_data
+    
+    def compute_estimate_hba1c(self, cmg_data):
+        return 0.0296 * cmg_data.mean() + 2.419
 
     def compute_variance(self, cgm_data):
         return cgm_data.var()
@@ -56,6 +59,7 @@ class FeatureExtractor:
         return cgm_data.max()
 
     def transform(self, X: pd.DataFrame):
+        X = self.add_cgm_feature(X, "hba1c_estimate", self.compute_estimate_hba1c)
         X = self.add_cgm_feature(X, "cgm_variance", self.compute_variance)
         X = self.add_cgm_feature(X, "cgm_mean", self.compute_mean)
         X = self.add_cgm_feature(X, "cgm_time_in_range", self.compute_average_time_in_range)
