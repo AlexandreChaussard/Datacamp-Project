@@ -5,6 +5,7 @@ import numpy as np
 
 from sklearn.ensemble import HistGradientBoostingClassifier
 
+
 def get_cgm_data():
     data = pd.read_csv('external_data.csv')
     data.set_index('patient_id', inplace=True)
@@ -78,7 +79,7 @@ def get_estimator() -> Pipeline:
         max_depth=3,
         random_state=42,
         validation_fraction=0.3,
-        class_weight={1:0.9, 0:0.3}
+        class_weight={1: 0.9, 0: 0.3}
     )
 
     pipe = make_pipeline(

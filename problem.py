@@ -21,12 +21,13 @@ workflow = rw.workflows.EstimatorExternalData()
 
 class Recall(ClassifierBaseScoreType):
     def __init__(self,
-                 name : str ='Recall_0',
-                 precision : int =2,
-                 pos_label : int = 0):
+                 name: str = 'Recall_0',
+                 precision: int = 2,
+                 pos_label: int = 0):
         self.name = name
         self.precision = precision
         self.pos_label = pos_label
+
     def __call__(self, y_true_label_index, y_pred_label_index):
         score = recall_score(y_true_label_index, y_pred_label_index, pos_label=self.pos_label)
         return score
@@ -34,9 +35,9 @@ class Recall(ClassifierBaseScoreType):
 
 class Precision(ClassifierBaseScoreType):
     def __init__(self,
-                 name : str ='Precision_0',
-                 precision : int =2,
-                 pos_label : int = 0):
+                 name: str = 'Precision_0',
+                 precision: int = 2,
+                 pos_label: int = 0):
         self.name = name
         self.precision = precision
         self.pos_label = pos_label
@@ -44,6 +45,7 @@ class Precision(ClassifierBaseScoreType):
     def __call__(self, y_true_label_index, y_pred_label_index):
         score = precision_score(y_true_label_index, y_pred_label_index, pos_label=self.pos_label)
         return score
+
 
 score_types = [
     Recall(name='recall_1', pos_label=1),
@@ -54,6 +56,8 @@ score_types = [
     rw.score_types.ROCAUC(name="auc"),
     rw.score_types.ClassificationError(name='error')
 ]
+
+
 # -----------------------------------------------------------------------------
 # Cross-validation scheme
 # -----------------------------------------------------------------------------

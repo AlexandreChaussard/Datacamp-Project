@@ -14,7 +14,6 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 
 
-
 def get_cgm_data(user_id, path='.'):
     """
     Fetch the CGM data of a given individual in the dataset
@@ -22,8 +21,6 @@ def get_cgm_data(user_id, path='.'):
 
     # Fetching the CGM data
     cgm_data = pd.read_csv(os.path.join(path, 'data', 'raw', f'case  {user_id}.csv'), index_col=[0])
-    # Interpolate the missing data (this is verified by smoothing techniques of Abbott & Dexcom CGMs)
-    cgm_data = cgm_data.interpolate()
     return cgm_data.rename(columns={'hora': 'timestamp', 'glucemia': 'glycemia'})
 
 
@@ -52,7 +49,9 @@ def get_48h_cgm_data(path='.'):
     # Building the dataframe
     df = pd.DataFrame(columns=[sample_index_to_time(i) for i in range(0, 576)])
     for user_id in user_id_list:
-        cgm_data = get_cgm_data(user_id, path)["glycemia"].values.tolist()
+        cgm_data = get_cgm_data(user_id, path)["glycemia"]
+        # Linear interpolating the missing data (this is verified by smoothing techniques of Abbott & Dexcom CGMs)
+        cgm_data = cgm_data.interpolate(method='linear').values.tolist()
         # We have 2 possible situations, since the data are sampled at 5 minutes rate:
         #  * Either the patient has come through a 48h monitoring, in which case the time serie is 576 long
         #  * Either the patient has come through a 24h monitoring, which case the time serie is 288 long, and we fill
