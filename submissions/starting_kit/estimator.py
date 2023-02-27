@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline, make_pipeline
 import sklearn.preprocessing as preprocessing
 import numpy as np
-
+from numpy import trapz
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 
@@ -17,6 +17,44 @@ def get_patient_cgm_data(patient_id):
     patient_cgm = cgm_data.loc[patient_id]
     patient_cgm.dropna(inplace=True)
     return patient_cgm
+
+
+def compute_estimate_hba1c(cmg_data):
+    return 0.0296 * cmg_data.mean() + 2.419
+
+
+def compute_variance(cgm_data):
+    return cgm_data.var()
+
+
+def compute_mean(cgm_data):
+    return cgm_data.mean()
+
+
+def compute_average_time_in_range(cgm_data, normal_range=None):
+    if normal_range is None:
+        normal_range = [70, 127]
+
+    index_in_range = cgm_data[
+        (cgm_data >= normal_range[0]) & (cgm_data <= normal_range[1])
+        ].index
+    return len(index_in_range) / len(cgm_data.index)
+
+
+def compute_maximum(cgm_data):
+    return cgm_data.max()
+
+
+def compute_skewness(cgm_data):
+    return cgm_data.skew()
+
+
+def compute_area_under_cgm(cgm_data):
+    return trapz(cgm_data)
+
+
+def compute_Q3(cgm_data):
+    return cgm_data.quantile(0.75)
 
 
 class FeatureExtractor:
@@ -38,29 +76,15 @@ class FeatureExtractor:
         clinical_data[feature_name] = feature_column
         return clinical_data
 
-    def compute_variance(self, cgm_data):
-        return cgm_data.var()
-
-    def compute_mean(self, cgm_data):
-        return cgm_data.mean()
-
-    def compute_average_time_in_range(self, cgm_data, normal_range=None):
-        if normal_range is None:
-            normal_range = [70, 127]
-
-        index_in_range = cgm_data[
-            (cgm_data >= normal_range[0]) & (cgm_data <= normal_range[1])
-            ].index
-        return len(index_in_range) / len(cgm_data.index)
-
-    def compute_maximum(self, cgm_data):
-        return cgm_data.max()
-
     def transform(self, X: pd.DataFrame):
-        X = self.add_cgm_feature(X, "cgm_variance", self.compute_variance)
-        X = self.add_cgm_feature(X, "cgm_mean", self.compute_mean)
-        X = self.add_cgm_feature(X, "cgm_time_in_range", self.compute_average_time_in_range)
-        X = self.add_cgm_feature(X, "cgm_max", self.compute_maximum)
+        X = self.add_cgm_feature(X, "hba1c_estimate", compute_estimate_hba1c)
+        X = self.add_cgm_feature(X, "cgm_variance", compute_variance)
+        X = self.add_cgm_feature(X, "cgm_mean", compute_mean)
+        X = self.add_cgm_feature(X, "cgm_time_in_range", compute_average_time_in_range)
+        X = self.add_cgm_feature(X, "cgm_max", compute_maximum)
+        X = self.add_cgm_feature(X, "cgm_skewness", compute_skewness)
+        X = self.add_cgm_feature(X, "cgm_area_under", compute_area_under_cgm)
+        X = self.add_cgm_feature(X, "cgm_Q3", compute_Q3)
 
         return X
 
@@ -72,10 +96,13 @@ def get_preprocessing():
 def get_estimator() -> Pipeline:
     feature_extractor = FeatureExtractor()
     classifier = HistGradientBoostingClassifier(
-        max_depth=3,
-        random_state=42,
-        validation_fraction=0.3,
-        class_weight={1: 0.9, 0: 0.3}
+        max_depth=26,
+        learning_rate=0.0045,
+        l2_regularization=0.349,
+        min_samples_leaf=32,
+        max_iter=99,
+        class_weight={1: 10, 0: 1},
+        random_state=42
     )
 
     pipe = make_pipeline(

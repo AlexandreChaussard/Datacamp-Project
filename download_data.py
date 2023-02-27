@@ -143,4 +143,4 @@ def build_datasets(test_size):
 
 if __name__ == '__main__':
     # One can pick the test size they want in the end
-    build_datasets(test_size=0.33)
+    build_datasets(test_size=0.35)

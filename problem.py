@@ -4,7 +4,7 @@ import rampwf as rw
 from rampwf.score_types.base import BaseScoreType
 from rampwf.score_types.classifier_base import ClassifierBaseScoreType
 from sklearn.model_selection import RepeatedStratifiedKFold
-from sklearn.metrics import recall_score, precision_score
+from sklearn.metrics import recall_score, precision_score, f1_score
 
 problem_title = 'Types 2 Diabetes prediction'
 # A type (class) which will be used to create wrapper objects for y_pred
@@ -46,13 +46,23 @@ class Precision(ClassifierBaseScoreType):
         score = precision_score(y_true_label_index, y_pred_label_index, pos_label=self.pos_label)
         return score
 
+class f_1(ClassifierBaseScoreType):
+    def __init__(self,
+                 name: str = 'f_1',
+                 precision: int = 2):
+        self.name = name
+        self.precision = precision
+
+    def __call__(self, y_true_label_index, y_pred_label_index):
+        score = f1_score(y_true_label_index, y_pred_label_index)
+        return score
 
 score_types = [
     Recall(name='recall_1', pos_label=1),
     Recall(name='recall_0', pos_label=0),
     Precision(name='precision_1', pos_label=1),
     Precision(name='precision_0', pos_label=0),
-
+    f_1(),
     rw.score_types.ROCAUC(name="auc"),
     rw.score_types.ClassificationError(name='error')
 ]
@@ -63,7 +73,7 @@ score_types = [
 # -----------------------------------------------------------------------------
 
 def get_cv(X, y):
-    cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=1)
+    cv = RepeatedStratifiedKFold(n_splits=2, n_repeats=3, random_state=1)
     return cv.split(X, y)
 
 
