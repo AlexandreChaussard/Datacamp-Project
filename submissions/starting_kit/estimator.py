@@ -6,17 +6,10 @@ from numpy import trapz
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 
-def get_cgm_data():
-    data = pd.read_csv('external_data.csv')
+def get_cgm_data(path=""):
+    data = pd.read_csv(path+'external_data.csv')
     data.set_index('patient_id', inplace=True)
     return data
-
-
-def get_patient_cgm_data(patient_id):
-    cgm_data = get_cgm_data()
-    patient_cgm = cgm_data.loc[patient_id]
-    patient_cgm.dropna(inplace=True)
-    return patient_cgm
 
 
 def compute_estimate_hba1c(cmg_data):
@@ -49,8 +42,12 @@ def compute_skewness(cgm_data):
     return cgm_data.skew()
 
 
-def compute_area_under_cgm(cgm_data):
-    return trapz(cgm_data)
+def area_norm_points(cgm_data):
+    if cgm_data.isna().sum() !=0:
+        area = trapz(cgm_data[:288])/288
+    else:
+        area = trapz(cgm_data)/576
+    return area
 
 
 def compute_Q3(cgm_data):
@@ -65,15 +62,12 @@ class FeatureExtractor:
         return self
 
     def add_cgm_feature(self, clinical_data, feature_name, compute_feature_function):
-        n_individuals = len(clinical_data)
-        feature_column = np.zeros((n_individuals,))
 
-        for i, user_id in enumerate(clinical_data.index.values):
-            cgm_data = get_patient_cgm_data(int(user_id))
-            feature = compute_feature_function(cgm_data)
-            feature_column[i] = feature
+        cgm_df = get_cgm_data()
+        
+        feature = cgm_df.apply(compute_feature_function, axis=1)
 
-        clinical_data[feature_name] = feature_column
+        clinical_data[feature_name] = feature
         return clinical_data
 
     def transform(self, X: pd.DataFrame):
@@ -83,7 +77,7 @@ class FeatureExtractor:
         X = self.add_cgm_feature(X, "cgm_time_in_range", compute_average_time_in_range)
         X = self.add_cgm_feature(X, "cgm_max", compute_maximum)
         X = self.add_cgm_feature(X, "cgm_skewness", compute_skewness)
-        X = self.add_cgm_feature(X, "cgm_area_under", compute_area_under_cgm)
+        X = self.add_cgm_feature(X, "cgm_area_under", area_norm_points)
         X = self.add_cgm_feature(X, "cgm_Q3", compute_Q3)
 
         return X
