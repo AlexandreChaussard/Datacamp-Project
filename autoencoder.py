@@ -5,6 +5,8 @@ class Autoencoder(torch.nn.Module):
     def __init__(
             self,
             input_size,
+            conv_layers,
+            conv_sizes,
             hidden_layers_encoder,
             hidden_layers_decoder,
             latent_dim,
@@ -12,31 +14,45 @@ class Autoencoder(torch.nn.Module):
     ):
         super(Autoencoder, self).__init__()
 
-        encoder_layers = []
-        decoder_layers = []
+        conv_layers = [1] + conv_layers
+        self.conv_net = []
+        for i in range(0, len(conv_layers)-1):
+            self.conv_net += [
+                torch.nn.Conv1d(conv_layers[i], conv_layers[i+1], kernel_size=conv_sizes[i], padding='same'),
+                torch.nn.BatchNorm1d(conv_layers[i+1]),
+                torch.nn.Dropout(dropout),
+                torch.nn.ReLU()
+            ]
 
-        hidden_layers_encoder = [input_size] + hidden_layers_encoder + [latent_dim]
+        self.encoder = []
+        self.decoder = []
+
+        hidden_layers_encoder = [conv_layers[-1] * input_size] + hidden_layers_encoder + [latent_dim]
         hidden_layers_decoder = [latent_dim] + hidden_layers_decoder + [input_size]
 
         for i in range(0, len(hidden_layers_encoder)-1):
-            encoder_layers += [
+            self.encoder += [
                 torch.nn.Linear(hidden_layers_encoder[i], hidden_layers_encoder[i+1]),
                 torch.nn.ReLU()
             ]
 
         for i in range(0, len(hidden_layers_decoder)-1):
-            decoder_layers += [
+            self.decoder += [
                 torch.nn.Linear(hidden_layers_decoder[i], hidden_layers_decoder[i+1]),
                 torch.nn.ReLU()
             ]
 
-        self.encoder = torch.nn.Sequential(*encoder_layers)
-        self.decoder = torch.nn.Sequential(*decoder_layers)
+        self.conv_net = torch.nn.Sequential(*self.conv_net)
+        self.encoder = torch.nn.Sequential(*self.encoder)
+        self.decoder = torch.nn.Sequential(*self.decoder)
 
         self.loss_fn = torch.nn.MSELoss()
 
     def forward(self, x):
-        encoded = self.encoder(x)
+        h = self.conv_net(x)
+        # Flatten the output for dense layer entry
+        h = h.view(h.shape[0], -1)
+        encoded = self.encoder(h)
         decoded = self.decoder(encoded)
         return decoded
 
@@ -54,7 +70,7 @@ def train(model, optimizer, data_train_loader, n_epoch):
             train_loss += loss.item()
             optimizer.step()
 
-        print('[*] Epoch: {} - Average loss: {:.4f}'.format(epoch, train_loss / len(data_train_loader.dataset)))
+        print('[*] Epoch: {} - Average loss: {:.4f}'.format(epoch+1, train_loss / len(data_train_loader.dataset)))
 
     return model
 
@@ -86,8 +102,8 @@ def get_patient_cgm_data(patient_id):
 class CGM_dataset(Dataset):
 
     def __init__(self, cgm_data):
-        self.x = torch.tensor(cgm_data.to_numpy(), dtype=torch.float32)
-        self.y = torch.tensor(cgm_data.to_numpy(), dtype=torch.float32)
+        self.x = torch.tensor(cgm_data.to_numpy(), dtype=torch.float32).reshape(-1, 1, len(cgm_data)).permute(2, 1, 0)
+        self.y = torch.tensor(cgm_data.to_numpy(), dtype=torch.float32).reshape(-1, 1, len(cgm_data)).permute(2, 1, 0)
 
     def __len__(self):
         return len(self.y)
@@ -111,6 +127,8 @@ test_loader = DataLoader(test_cgm_data, batch_size=32, shuffle=False)
 
 model = Autoencoder(
     input_size=576,
+    conv_layers=[300, 200, 100],
+    conv_sizes=[9, 33, 77],
     hidden_layers_encoder=[288, 128],
     hidden_layers_decoder=[128, 288],
     latent_dim=64,
@@ -119,22 +137,26 @@ model = Autoencoder(
 
 optimizer = torch.optim.Adam(model.parameters(), lr=10e-3, weight_decay=10e-4)
 
-train(model, optimizer, train_loader, n_epoch=200)
+train(model, optimizer, train_loader, n_epoch=100)
 
 reconstructed_cgm_data = []
-max_plot = 3
+max_plot = 30
 for batch_index, (cgm_entry_batch, _) in enumerate(test_loader):
     n_plots = 1
 
     for cgm_entry in cgm_entry_batch:
-        reconstructed_cgm_data = model(cgm_entry)
+        reconstructed_cgm_data = model(cgm_entry.view(1, 1, -1))
+        reconstructed_cgm_data = reconstructed_cgm_data.detach().numpy().squeeze()
+        cgm_entry = cgm_entry.detach().numpy().squeeze()
 
         fig, axs = plt.subplots()
-        axs.plot(cgm_entry.detach().numpy(), label="Original CGM data")
-        axs.plot(reconstructed_cgm_data.detach().numpy(), label="Reconstructed CGM data", color="r")
-
+        axs.plot(cgm_entry, label="Original CGM data")
+        axs.plot(reconstructed_cgm_data, label="Reconstructed CGM data", color="r")
+        axs.legend()
         n_plots += 1
         if n_plots >= max_plot:
             break
+    if n_plots >= max_plot:
+        break
 
 plt.show()
