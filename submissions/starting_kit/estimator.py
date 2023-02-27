@@ -81,6 +81,7 @@ def compute_sd1(cgm_val):
     sd1 = np.sqrt(0.5) * np.std(cgm_data_n1 - cgm_data_n)
     return sd1
 
+
 def compute_sd2(cgm_val):
     # consider only 24 hours of data for each patient
     cgm_val = cgm_val[:288]
@@ -89,6 +90,7 @@ def compute_sd2(cgm_val):
 
     sd2 = np.sqrt(0.5) * np.std(cgm_data_n1 + cgm_data_n)
     return sd2
+
 
 class FeatureExtractor:
     def __init__(self):
@@ -104,7 +106,6 @@ class FeatureExtractor:
         feature = cgm_df.apply(compute_feature_function, axis=1)
 
         clinical_data[feature_name] = feature.loc[clinical_data.index]
-        print(len(clinical_data))
 
         return clinical_data
 
@@ -114,13 +115,12 @@ class FeatureExtractor:
         X = self.add_cgm_feature(X, "cgm_mean", compute_mean)
         X = self.add_cgm_feature(X, "cgm_time_in_range", compute_average_time_in_range)
         X = self.add_cgm_feature(X, "cgm_max", compute_maximum)
-        X = self.add_cgm_feature(X, "cgm_skewness", compute_skewness)
         X = self.add_cgm_feature(X, "cgm_area_under", area_norm_points)
-        X = self.add_cgm_feature(X, "cgm_Q3", compute_Q3)
-        X = self.add_cgm_feature(X, "SampEn", sampen)
-        X = self.add_cgm_feature(X, "sd1", compute_sd1)
-        X = self.add_cgm_feature(X, "sd2", compute_sd2)
-
+        X = self.add_cgm_feature(X, "skewness", compute_skewness)
+        X = self.add_cgm_feature(X, "Q3", compute_Q3)
+        X = self.add_cgm_feature(X, 'sd1', compute_sd1)
+        X = self.add_cgm_feature(X, 'sd2', compute_sd2)
+    
         return X
 
 
@@ -131,18 +131,25 @@ def get_preprocessing():
 def get_estimator() -> Pipeline:
     feature_extractor = FeatureExtractor()
     classifier = HistGradientBoostingClassifier(
+        l2_regularization=0.5,
+        learning_rate=0.01,
+        max_iter=500,
+        class_weight={1: 10, 0: 1},
+        random_state=42
+    )
+    """
         max_depth=26,
         learning_rate=0.0045,
         l2_regularization=0.349,
         min_samples_leaf=32,
         max_iter=99,
-        class_weight={1: 8, 0: 1},
+        class_weight={1: 10, 0: 1},
         random_state=42
-    )
+    )"""
 
     pipe = make_pipeline(
         feature_extractor,
-        *get_preprocessing(),
+        preprocessing.MinMaxScaler(),
         classifier
     )
 
