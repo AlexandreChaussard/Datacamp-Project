@@ -54,6 +54,42 @@ def compute_Q3(cgm_data):
     return cgm_data.quantile(0.75)
 
 
+def sampen(L, m=2, r=3):
+    """Sample entropy."""
+    N = len(L)
+    B = 0.0
+    A = 0.0
+    # Split time series and save all templates of length m
+    xmi = np.array([L[i : i + m] for i in range(N - m)])
+    xmj = np.array([L[i : i + m] for i in range(N - m + 1)])
+    # Save all matches minus the self-match, compute B
+    B = np.sum([np.sum(np.abs(xmii - xmj).max(axis=1) <= r) - 1 for xmii in xmi])
+    # Similar for computing A
+    m += 1
+    xm = np.array([L[i : i + m] for i in range(N - m + 1)])
+    A = np.sum([np.sum(np.abs(xmi - xm).max(axis=1) <= r) - 1 for xmi in xm])
+    # Return SampEn
+    return -np.log(A / B)
+
+
+def compute_sd1(cgm_val):
+    # consider only 24 hours of data for each patient
+    cgm_val = cgm_val[:288]
+    cgm_data_n = np.array(cgm_val[:-1])
+    cgm_data_n1 = np.array(cgm_val[1:])
+
+    sd1 = np.sqrt(0.5) * np.std(cgm_data_n1 - cgm_data_n)
+    return sd1
+
+def compute_sd2(cgm_val):
+    # consider only 24 hours of data for each patient
+    cgm_val = cgm_val[:288]
+    cgm_data_n = np.array(cgm_val[:-1])
+    cgm_data_n1 = np.array(cgm_val[1:])
+
+    sd2 = np.sqrt(0.5) * np.std(cgm_data_n1 + cgm_data_n)
+    return sd2
+
 class FeatureExtractor:
     def __init__(self):
         pass
@@ -67,7 +103,9 @@ class FeatureExtractor:
         
         feature = cgm_df.apply(compute_feature_function, axis=1)
 
-        clinical_data[feature_name] = feature
+        clinical_data[feature_name] = feature.loc[clinical_data.index]
+        print(len(clinical_data))
+
         return clinical_data
 
     def transform(self, X: pd.DataFrame):
@@ -79,6 +117,9 @@ class FeatureExtractor:
         X = self.add_cgm_feature(X, "cgm_skewness", compute_skewness)
         X = self.add_cgm_feature(X, "cgm_area_under", area_norm_points)
         X = self.add_cgm_feature(X, "cgm_Q3", compute_Q3)
+        X = self.add_cgm_feature(X, "SampEn", sampen)
+        X = self.add_cgm_feature(X, "sd1", compute_sd1)
+        X = self.add_cgm_feature(X, "sd2", compute_sd2)
 
         return X
 
@@ -95,7 +136,7 @@ def get_estimator() -> Pipeline:
         l2_regularization=0.349,
         min_samples_leaf=32,
         max_iter=99,
-        class_weight={1: 10, 0: 1},
+        class_weight={1: 8, 0: 1},
         random_state=42
     )
 
