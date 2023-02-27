@@ -4,7 +4,7 @@ import rampwf as rw
 from rampwf.score_types.base import BaseScoreType
 from rampwf.score_types.classifier_base import ClassifierBaseScoreType
 from sklearn.model_selection import RepeatedStratifiedKFold
-from sklearn.metrics import recall_score, precision_score, f1_score
+from sklearn.metrics import recall_score, precision_score, f1_score, confusion_matrix
 
 problem_title = 'Types 2 Diabetes prediction'
 # A type (class) which will be used to create wrapper objects for y_pred
@@ -57,6 +57,51 @@ class f_1(ClassifierBaseScoreType):
     def __call__(self, y_true_label_index, y_pred_label_index):
         score = f1_score(y_true_label_index, y_pred_label_index)
         return score
+    
+class tn(ClassifierBaseScoreType):
+    def __init__(self,
+                 name: str = 'tn',
+                 precision: int = 1):
+        self.name = name
+        self.precision = precision
+
+    def __call__(self, y_true_label_index, y_pred_label_index):
+        tn, _, _, _ = confusion_matrix(y_true_label_index, y_pred_label_index).ravel()
+        return tn
+
+class fp(ClassifierBaseScoreType):
+    def __init__(self,
+                 name: str = 'fp',
+                 precision: int = 1):
+        self.name = name
+        self.precision = precision
+
+    def __call__(self, y_true_label_index, y_pred_label_index):
+        _, fp, _, _ = confusion_matrix(y_true_label_index, y_pred_label_index).ravel()
+        return fp
+
+class fn(ClassifierBaseScoreType):
+    def __init__(self,
+                 name: str = 'fn',
+                 precision: int = 1):
+        self.name = name
+        self.precision = precision
+
+    def __call__(self, y_true_label_index, y_pred_label_index):
+        _, _, fn, _ = confusion_matrix(y_true_label_index, y_pred_label_index).ravel()
+        return fn
+
+class tp(ClassifierBaseScoreType):
+    def __init__(self,
+                 name: str = 'tp',
+                 precision: int = 1):
+        self.name = name
+        self.precision = precision
+
+    def __call__(self, y_true_label_index, y_pred_label_index):
+        _, _, _, tp = confusion_matrix(y_true_label_index, y_pred_label_index).ravel()
+        return tp
+
 
 
 score_types = [
@@ -66,7 +111,11 @@ score_types = [
     Precision(name='precision_0', pos_label=0),
     f_1(),
     rw.score_types.ROCAUC(name="auc"),
-    rw.score_types.ClassificationError(name='error')
+    rw.score_types.ClassificationError(name='error'),
+    tn(),
+    fn(),
+    tp(),
+    fp()
 ]
 
 
@@ -75,7 +124,7 @@ score_types = [
 # -----------------------------------------------------------------------------
 
 def get_cv(X, y):
-    cv = RepeatedStratifiedKFold(n_splits=2, n_repeats=3, random_state=1)
+    cv = RepeatedStratifiedKFold(n_splits=2, n_repeats=1, random_state=1)
     return cv.split(X, y)
 
 
