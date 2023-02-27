@@ -11,20 +11,25 @@ def get_cgm_data():
     data.set_index('patient_id', inplace=True)
     return data
 
+
 def get_patient_cgm_data(patient_id):
     cgm_data = get_cgm_data()
     patient_cgm = cgm_data.loc[patient_id]
     patient_cgm.dropna(inplace=True)
     return patient_cgm
 
-def compute_estimate_hba1c( cmg_data):
+
+def compute_estimate_hba1c(cmg_data):
     return 0.0296 * cmg_data.mean() + 2.419
+
 
 def compute_variance(cgm_data):
     return cgm_data.var()
 
+
 def compute_mean(cgm_data):
     return cgm_data.mean()
+
 
 def compute_average_time_in_range(cgm_data, normal_range=None):
     if normal_range is None:
@@ -35,17 +40,22 @@ def compute_average_time_in_range(cgm_data, normal_range=None):
         ].index
     return len(index_in_range) / len(cgm_data.index)
 
+
 def compute_maximum(cgm_data):
     return cgm_data.max()
+
 
 def compute_skewness(cgm_data):
     return cgm_data.skew()
 
+
 def compute_area_under_cgm(cgm_data):
     return trapz(cgm_data)
 
+
 def compute_Q3(cgm_data):
     return cgm_data.quantile(0.75)
+
 
 class FeatureExtractor:
     def __init__(self):
@@ -65,8 +75,6 @@ class FeatureExtractor:
 
         clinical_data[feature_name] = feature_column
         return clinical_data
-    
-    
 
     def transform(self, X: pd.DataFrame):
         X = self.add_cgm_feature(X, "hba1c_estimate", compute_estimate_hba1c)
@@ -93,7 +101,7 @@ def get_estimator() -> Pipeline:
         l2_regularization=0.349,
         min_samples_leaf=32,
         max_iter=99,
-        class_weight={1:10, 0:1},
+        class_weight={1: 10, 0: 1},
         random_state=42
     )
 

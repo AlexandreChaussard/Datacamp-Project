@@ -78,7 +78,6 @@ def train(model, optimizer, data_train_loader, n_epoch):
 ####################################################
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from problem import get_train_data, get_test_data
 
@@ -135,7 +134,7 @@ model = Autoencoder(
     dropout=0.3
 )
 
-optimizer = torch.optim.Adam(model.parameters(), lr=10e-3, weight_decay=10e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=10e-4, weight_decay=10e-6)
 
 train(model, optimizer, train_loader, n_epoch=100)
 
