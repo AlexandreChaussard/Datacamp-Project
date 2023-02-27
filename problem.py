@@ -46,6 +46,7 @@ class Precision(ClassifierBaseScoreType):
         score = precision_score(y_true_label_index, y_pred_label_index, pos_label=self.pos_label)
         return score
 
+
 class f_1(ClassifierBaseScoreType):
     def __init__(self,
                  name: str = 'f_1',
@@ -56,6 +57,7 @@ class f_1(ClassifierBaseScoreType):
     def __call__(self, y_true_label_index, y_pred_label_index):
         score = f1_score(y_true_label_index, y_pred_label_index)
         return score
+
 
 score_types = [
     Recall(name='recall_1', pos_label=1),
