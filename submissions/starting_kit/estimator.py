@@ -132,13 +132,13 @@ def get_estimator() -> Pipeline:
     feature_extractor = FeatureExtractor()
     classifier = HistGradientBoostingClassifier(
         l2_regularization=0.5,
+        min_samples_leaf=25,
         learning_rate=0.01,
         max_iter=500,
         class_weight={1: 10, 0: 1},
         random_state=42
     )
     """
-        max_depth=26,
         learning_rate=0.0045,
         l2_regularization=0.349,
         min_samples_leaf=32,
