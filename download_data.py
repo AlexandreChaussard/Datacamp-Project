@@ -24,6 +24,10 @@ def get_cgm_data(user_id, path='.'):
     return cgm_data.rename(columns={'hora': 'timestamp', 'glucemia': 'glycemia'})
 
 
+def compute_estimate_hba1c(cmg_data):
+    return 0.0296 * cmg_data.mean(axis=1) + 2.419
+
+
 def get_48h_cgm_data(path='.'):
     """
     Fetch the clinical data for every individual (this is meant to be used as a private shortcut function)
@@ -84,9 +88,6 @@ def read_clinical_data_and_labels(path='.'):
     # We fetch the raw clinical data first
     clinical_data = read_raw_clinical_data(path)
 
-    # We also drop the "HbA1c" feature as it is part of our study to try to infer with blood measurement
-    clinical_data = clinical_data.drop(columns=["HbA1c"])
-
     # Now we fetch the labels and seperate them from the original dataframe
     y = clinical_data["T2DM"].values.astype(np.int32)
     X = clinical_data.drop(columns=["T2DM"])
@@ -98,6 +99,12 @@ def read_clinical_data_and_labels(path='.'):
     X = pd.DataFrame(imp.fit_transform(X), columns=X.columns)
     # And we replace the indexes correctly
     X.index = indexes
+
+    # Now we fill the HbA1c missing values using the CGM time series
+    all_cgm_data = get_48h_cgm_data()
+    estimated_HbA1c = compute_estimate_hba1c(all_cgm_data)
+    for index in X[X["HbA1c"].isna()].index:
+        X['HbA1c'][index] = estimated_HbA1c[index]
 
     return X, y
 
