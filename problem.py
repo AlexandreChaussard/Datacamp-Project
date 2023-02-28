@@ -83,24 +83,25 @@ class fp(ClassifierBaseScoreType):
 class fn(ClassifierBaseScoreType):
     def __init__(self,
                  name: str = 'fn',
-                 precision: int = 1):
+                 precision: int = 3):
         self.name = name
         self.precision = precision
 
     def __call__(self, y_true_label_index, y_pred_label_index):
         _, _, fn, _ = confusion_matrix(y_true_label_index, y_pred_label_index).ravel()
-        return fn
+        return float(fn)
 
 class tp(ClassifierBaseScoreType):
     def __init__(self,
                  name: str = 'tp',
-                 precision: int = 1):
+                 precision: int = 3):
         self.name = name
         self.precision = precision
 
     def __call__(self, y_true_label_index, y_pred_label_index):
         _, _, _, tp = confusion_matrix(y_true_label_index, y_pred_label_index).ravel()
-        return tp
+        return float(tp)
+
 
 
 
@@ -109,13 +110,13 @@ score_types = [
     Recall(name='recall_0', pos_label=0),
     Precision(name='precision_1', pos_label=1),
     Precision(name='precision_0', pos_label=0),
-    f_1(),
+    f_1(name='f_1'),
     rw.score_types.ROCAUC(name="auc"),
     rw.score_types.ClassificationError(name='error'),
-    tn(),
-    fn(),
-    tp(),
-    fp()
+    tn(name='tn'),
+    fn(name='fn'),
+    tp(name='tp'),
+    fp(name='fp'),
 ]
 
 
