@@ -56,5 +56,3 @@ You can get more information regarding this command line:
 ```bash
 ramp-test --help
 ```
-
-### To go further
