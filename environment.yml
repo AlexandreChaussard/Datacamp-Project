@@ -1,4 +1,4 @@
-name: ramp-iris
+name: ramp-dt2
 channels:
   - defaults
 dependencies:

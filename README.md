@@ -1,4 +1,4 @@
-# Predicting Type 2 Diabetes Mellitus with non-invasive measurements
+# Early detection of Type 2 Diabetes Mellitus
 
 Authors : AMANI Alexandra, BISCARRAT Lilian, CHAUSSARD Alexandre, CLERGUE Eva, NORMAND Sophie, SALEMBIEN Tom
 
@@ -6,17 +6,13 @@ This challenge was done as a project for the Master 2 Data Science (2021/2022), 
 
 ## Introduction
 
-Diabetes is a growing disease, affecting over 10% of the worldwide population. The vast majority of diabetics are type 2 diabetics (96%), that is generally characterized by a resistance to insulin, which is a molecule that enables glucose to enter the cells and provide energy. Not being able to properly consume sugar results in several complications that are all tied up to the high sugar level concentration in the blood due to not being able to consume it, resulting in possible blindness, hearth disease, infections, and so on.
+Diabetes is a growing disease, affecting over 10% of the worldwide population. The vast majority of diabetics are type 2 diabetics (96%), that is generally characterized by a resistance to insulin, or limited production of insulin by the pancreatic cells, which is a molecule that enables glucose to enter the body cells and provide energy. Not being able to properly consume sugar results in several complications that are all tied up to the high sugar level concentration in the blood due to not being able to consume it, resulting in possible blindness, hearth disease, infections, and so on.
 
-Therefore, it is one today's most important challenge to properly diagnose diabetics, as short as possible to prevent complications to settle. At the moment, diabetes is diagnosed in multiple ways, one of the most secure and proper one being HbA1c measurement from blood samples. The measurement of HbA1c for a sain individual is around 5.7%, while it is said to be diabetic-like when it reaches 6.5% and more.
+Therefore, it is one today's most important challenge to properly diagnose diabetics, as early as possible to prevent complications from settling. At the moment, diabetes is diagnosed in multiple ways, one of the most secure and proper one being HbA1c measurement from blood samples (glycohemoglobin). The measurement of HbA1c for a sain individual is around 5.7%, while it is said to be diabetic-like when it reaches 6.5% and more.
 
-While this technique has proved to be really efficient in the diagnosis, it has two main downsides that we would like to tackle in this study:
+While this technique has proved to be really efficient in the diagnosis, it has one major downside that we would like to tackle in this study. Indeed, HbA1c reflects the last 3 months of blood sugar average, therefore, in order to see that diabetes has settled, the individual has to have been severly diabetic for 3 months at least. Moreover, there exists different severities of type 2 diabetes, resulting in sometimes having to be diabetic (or pre-diabetic) for an even longer period before HbA1c becomes significant. This delay in the diagnosis could severly impact the individual, with possible irrevertible side effects.
 
-- First, HbA1c is a post-disease settlement indicator, as it requires the patient to have abnormally high sugar levels over 3 months to be indicating the disease. One would rather like to be able to diagnose diabetes before it reaches that critical point.
-- Second, HbA1c being a blood measurement, which is naturally invasive for the patient and some may even be really reluctant and refuse to go for a diagnosis. Also, it requires careful analysis in a medical lab, which obviously costs money.
-
-As a result, the goal of our study is to provide a machine learning algorithm that is able to predict whether or not somebody may become diabetic in the coming time, based on blood glucose measurements from a non-invasive Continuous Glucose Monitor (CGM), as well as gathered clinical data for the patient over the duration of the [reference study](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0225817#sec018).
-
+As a result, the goal of our study is to provide a machine learning algorithm that is able to predict whether or not somebody may develop a type 2 diabetes in the coming months or years, based on blood glucose measurements from a non-invasive Continuous Glucose Monitor (CGM), as well as gathered clinical data from the patient over 3 years. The goal of the algorithm is not to provide a diagnosis of the disease, but rather to unveil risky situations so that possibly future diabetics can be taken in charge before the disease settles and causes damages. Basically, it aims at detecting early stage diabetes so more tests can be ran by doctors and possibly give early treatements.
 ## Getting started
 
 ### Install
